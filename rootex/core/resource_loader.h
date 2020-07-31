@@ -19,6 +19,10 @@ static const inline HashMap<ResourceFile::Type, Vector<String>> SupportedFiles =
 	    { ".obj", ".blend", ".3ds", ".fbx" },
 	},
 	{
+	    ResourceFile::Type::AnimatedModel,
+	    { ".dae" },
+	},
+	{
 	    ResourceFile::Type::Audio,
 	    { ".wav" },
 	},
@@ -52,6 +56,7 @@ class ResourceLoader
 	
 	static void UpdateFileTimes(ResourceFile* file);
 	static void LoadAssimp(ModelResourceFile* file);
+	static void LoadAssimp(AnimatedModelResourceFile* file);
 	static void LoadALUT(AudioResourceFile* audioRes, const char* audioBuffer, int format, int size, float frequency);
 
 public:
@@ -64,6 +69,7 @@ public:
 	static LuaTextResourceFile* CreateLuaTextResourceFile(const String& path);
 	static AudioResourceFile* CreateAudioResourceFile(const String& path);
 	static ModelResourceFile* CreateModelResourceFile(const String& path);
+	static AnimatedModelResourceFile* CreateAnimatedModelResourceFile(const String& path);
 	static ImageResourceFile* CreateImageResourceFile(const String& path);
 	static FontResourceFile* CreateFontResourceFile(const String& path);
 	
@@ -79,6 +85,7 @@ public:
 	static void Reload(LuaTextResourceFile* file);
 	static void Reload(AudioResourceFile* file);
 	static void Reload(ModelResourceFile* file);
+	static void Reload(AnimatedModelResourceFile* file);
 	static void Reload(ImageResourceFile* file);
 	static void Reload(FontResourceFile* file);
 

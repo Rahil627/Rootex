@@ -166,6 +166,22 @@ void ModelResourceFile::RegisterAPI(sol::table& rootex)
 	    sol::base_classes, sol::bases<ResourceFile>());
 }
 
+AnimatedModelResourceFile::AnimatedModelResourceFile(ResourceData* resData)
+    : ResourceFile(Type::AnimatedModel, resData)
+{
+}
+
+AnimatedModelResourceFile::~AnimatedModelResourceFile()
+{
+}
+
+void AnimatedModelResourceFile::RegisterAPI(sol::state& rootex)
+{
+	sol::usertype<AnimatedModelResourceFile> animatedModelResourceFile = rootex.new_usertype<AnimatedModelResourceFile>(
+	    "AnimatedModelResourceFile",
+	    sol::base_classes, sol::bases<ResourceFile>());
+}
+
 ImageResourceFile::ImageResourceFile(ResourceData* resData)
     : ResourceFile(Type::Image, resData)
 {

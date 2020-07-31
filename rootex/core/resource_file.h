@@ -19,6 +19,7 @@ public:
 		Audio,
 		Text,
 		Model,
+		AnimatedModel,
 		Image,
 		Font
 	};
@@ -145,6 +146,25 @@ public:
 	explicit ModelResourceFile(ModelResourceFile&&) = delete;
 
 	Vector<Pair<Ref<Material>, Vector<Mesh>>>& getMeshes() { return m_Meshes; }
+};
+
+/// Representation of an animated 3D model file. Supports .dae files
+class AnimatedModelResourceFile : public ResourceFile
+{
+	explicit AnimatedModelResourceFile(ResourceData* resData);
+	~AnimatedModelResourceFile();
+
+	HashMap<Ref<Material>, Vector<AnimatedMesh>> m_Meshes;
+	Vector<Ref<Texture>> m_Textures;
+
+	friend class ResourceLoader;
+
+public:
+	static void RegisterAPI(sol::state& rootex);
+	explicit AnimatedModelResourceFile(AnimatedModelResourceFile&) = delete;
+	explicit AnimatedModelResourceFile(AnimatedModelResourceFile&&) = delete;
+
+	HashMap<Ref<Material>, Vector<AnimatedMesh>>& getMeshes() { return m_Meshes; }
 };
 
 /// Representation of an image file. Supports BMP, JPEG, PNG, TIFF, GIF, HD Photo, or other WIC supported file containers
