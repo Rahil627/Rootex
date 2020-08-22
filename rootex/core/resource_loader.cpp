@@ -209,6 +209,8 @@ void ResourceLoader::LoadAssimp(AnimatedModelResourceFile* file)
 	file->m_Meshes.clear();
 	file->m_Meshes.reserve(scene->mNumMeshes);
 
+	UINT boneCount = 0;
+
 	for (int i = 0; i < scene->mNumMeshes; i++)
 	{
 		const aiMesh* mesh = scene->mMeshes[i];
@@ -315,16 +317,45 @@ void ResourceLoader::LoadAssimp(AnimatedModelResourceFile* file)
 			}
 		}
 
-		VertexBoneData vertexBoneData;
-		ZeroMemory(&vertexBoneData, sizeof(VertexBoneData));
-		for (int j = 0; j < mesh->mNumBones; j++)
+		HashMap<int, Vector<UINT>> verticesIndex;
+		HashMap<int, Vector<float>> verticesWeights;
+		for (int boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++)
 		{
-			for (int v = 0; v < mesh->mBones[j]->mNumWeights; v++)
+			const aiBone* bone = mesh->mBones[boneIndex];
+			
+			file->m_BoneMapping[bone->mName.C_Str()] = boneCount + boneIndex;
+			
+			const aiMatrix4x4& offset = bone->mOffsetMatrix;
+			Matrix offsetMatrix = Matrix({ offset.a1, offset.a2, offset.a3, offset.a4,
+			    offset.b1, offset.b2, offset.b3, offset.b4,
+			    offset.c1, offset.c2, offset.c3, offset.c4 });
+			file->m_BoneOffsets.push_back(offsetMatrix);
+
+			for (int weightIndex = 0; weightIndex < bone->mNumWeights; weightIndex++)
 			{
-				vertexBoneData.m_BoneID = j;
-				vertexBoneData.m_Weight = mesh->mBones[j]->mWeights[v].mWeight;
-				vertices[mesh->mBones[j]->mWeights[v].mVertexId].m_VertexBoneData.push_back(vertexBoneData);
+				verticesIndex[bone->mWeights[weightIndex].mVertexId].push_back(boneCount + boneIndex);
+				verticesWeights[bone->mWeights[weightIndex].mVertexId].push_back(bone->mWeights[weightIndex].mWeight);
 			}
+		}
+
+		boneCount += mesh->mNumBones;
+
+		for (auto& [vertexID, boneIndices] : verticesIndex)
+		{
+			boneIndices.resize(4);
+			vertices[vertexID].m_BoneIndices[0] = boneIndices[0];
+			vertices[vertexID].m_BoneIndices[1] = boneIndices[1];
+			vertices[vertexID].m_BoneIndices[2] = boneIndices[2];
+			vertices[vertexID].m_BoneIndices[3] = boneIndices[3];
+		}
+
+		for (auto& [vertexID, boneWeights] : verticesWeights)
+		{
+			boneWeights.resize(4);
+			vertices[vertexID].m_BoneWeights.x = boneWeights[0];
+			vertices[vertexID].m_BoneWeights.y = boneWeights[1];
+			vertices[vertexID].m_BoneWeights.z = boneWeights[2];
+			vertices[vertexID].m_BoneWeights.w = boneWeights[3];
 		}
 
 		AnimatedMesh extractedMesh;
@@ -334,7 +365,16 @@ void ResourceLoader::LoadAssimp(AnimatedModelResourceFile* file)
 
 		file->m_Meshes[extractedMaterial].push_back(extractedMesh);
 	}
+
+	file->m_BoneTransforms.reserve(boneCount);
+
+	aiMatrix4x4 transform = scene->mRootNode->mTransformation;
+	Matrix toWorldTransformation = Matrix({ transform.a1, transform.a2, transform.a3, transform.a4,
+	    transform.b1, transform.b2, transform.b3, transform.b4,
+	    transform.c1, transform.c2, transform.c3, transform.c4 });
+	file->GetBoneTransforms(scene->mRootNode, toWorldTransformation);
 }
+
 
 void ResourceLoader::LoadALUT(AudioResourceFile* audioRes, const char* audioBuffer, int format, int size, float frequency)
 {

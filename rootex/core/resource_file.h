@@ -5,6 +5,7 @@
 #include "core/renderer/mesh.h"
 #include "core/renderer/texture.h"
 #include "DirectXTK/Inc/SpriteFont.h"
+#include <Assimp/scene.h>
 
 /// Interface of a file loaded from disk. Use ResourceLoader to load, create or save files.
 class ResourceFile
@@ -157,6 +158,10 @@ class AnimatedModelResourceFile : public ResourceFile
 	HashMap<Ref<Material>, Vector<AnimatedMesh>> m_Meshes;
 	Vector<Ref<Texture>> m_Textures;
 
+	HashMap<String, UINT> m_BoneMapping;
+	Vector<Matrix> m_BoneOffsets;
+	Vector<Matrix> m_BoneTransforms;
+
 	friend class ResourceLoader;
 
 public:
@@ -165,6 +170,7 @@ public:
 	explicit AnimatedModelResourceFile(AnimatedModelResourceFile&&) = delete;
 
 	HashMap<Ref<Material>, Vector<AnimatedMesh>>& getMeshes() { return m_Meshes; }
+	void GetBoneTransforms(aiNode* currentNode, Matrix rootTransform);
 };
 
 /// Representation of an image file. Supports BMP, JPEG, PNG, TIFF, GIF, HD Photo, or other WIC supported file containers

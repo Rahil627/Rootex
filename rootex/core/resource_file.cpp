@@ -182,6 +182,22 @@ void AnimatedModelResourceFile::RegisterAPI(sol::state& rootex)
 	    sol::base_classes, sol::bases<ResourceFile>());
 }
 
+void AnimatedModelResourceFile::GetBoneTransforms(aiNode* currentNode, Matrix parentRootTransform)
+{
+	aiMatrix4x4 transform = currentNode->mTransformation;
+	Matrix toRootTransformation = Matrix({ transform.a1, transform.a2, transform.a3, transform.a4,
+	    transform.b1, transform.b2, transform.b3, transform.b4,
+	    transform.c1, transform.c2, transform.c3, transform.c4 });
+	Matrix currentRootTransform = (toRootTransformation) * parentRootTransform;
+	
+	UINT index = m_BoneMapping[currentNode->mName.C_Str()];
+	m_BoneTransforms[index] = currentRootTransform;
+
+	for (size_t i = 0; i < currentNode->mNumChildren; i++) {
+		GetBoneTransforms(currentNode->mChildren[i], currentRootTransform);
+	}
+}
+
 ImageResourceFile::ImageResourceFile(ResourceData* resData)
     : ResourceFile(Type::Image, resData)
 {
