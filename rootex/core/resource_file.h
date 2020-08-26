@@ -5,6 +5,7 @@
 #include "core/renderer/mesh.h"
 #include "core/renderer/texture.h"
 #include "DirectXTK/Inc/SpriteFont.h"
+#include "core/animation/animation.h"
 #include <Assimp/scene.h>
 
 /// Interface of a file loaded from disk. Use ResourceLoader to load, create or save files.
@@ -161,6 +162,8 @@ class AnimatedModelResourceFile : public ResourceFile
 	HashMap<String, UINT> m_BoneMapping;
 	Vector<Matrix> m_BoneOffsets;
 	Vector<Matrix> m_BoneTransforms;
+
+	HashMap<String, SkeletalAnimation> m_Animations;
 
 	friend class ResourceLoader;
 

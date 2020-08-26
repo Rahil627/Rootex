@@ -373,8 +373,74 @@ void ResourceLoader::LoadAssimp(AnimatedModelResourceFile* file)
 	    transform.b1, transform.b2, transform.b3, transform.b4,
 	    transform.c1, transform.c2, transform.c3, transform.c4 });
 	file->GetBoneTransforms(scene->mRootNode, toWorldTransformation);
-}
 
+	for (int i = 0; i < scene->mNumAnimations; i++)
+	{
+		const aiAnimation* anim = scene->mAnimations[i];
+		String AnimationName = anim->mName.C_Str();
+
+		SkeletalAnimation animation;
+		
+		float durationInTicks = anim->mDuration;
+		float TicksPerSecond = anim->mTicksPerSecond;
+		float durationInSeconds = durationInSeconds / TicksPerSecond;
+		
+		animation.m_Duration = durationInSeconds;
+
+		animation.m_BoneAnimations.resize(anim->mNumChannels);
+
+		for (int j = 0; j < anim->mNumChannels; j++)
+		{
+			const aiNodeAnim* nodeAnim = anim->mChannels[j];
+			BoneAnimation boneAnims;
+			
+			for (int k = 0; k < nodeAnim->mNumPositionKeys; k++)
+			{
+				TranslationKeyframe keyframe;
+				
+				keyframe.m_Time = nodeAnim->mPositionKeys[k].mTime;
+
+				keyframe.m_Translation.x = nodeAnim->mPositionKeys[k].mValue.x;
+				keyframe.m_Translation.y = nodeAnim->mPositionKeys[k].mValue.y;
+				keyframe.m_Translation.z = nodeAnim->mPositionKeys[k].mValue.z;
+				
+				boneAnims.m_Translation.push_back(keyframe);
+			}
+
+			for (int k = 0; k < nodeAnim->mNumRotationKeys; k++)
+			{
+				RotationKeyframe keyframe;
+				
+				keyframe.m_Time = nodeAnim->mRotationKeys[k].mTime;
+				
+				keyframe.m_Rotation.x = nodeAnim->mRotationKeys[k].mValue.x;
+				keyframe.m_Rotation.y = nodeAnim->mRotationKeys[k].mValue.y;
+				keyframe.m_Rotation.z = nodeAnim->mRotationKeys[k].mValue.z;
+				keyframe.m_Rotation.w = nodeAnim->mRotationKeys[k].mValue.w;
+
+				boneAnims.m_Rotation.push_back(keyframe);
+			}
+
+			for (int k = 0; k < nodeAnim->mNumScalingKeys; k++)
+			{
+				ScalingKeyframe keyframe;
+
+				keyframe.m_Time = nodeAnim->mScalingKeys[k].mTime;
+
+				keyframe.m_Scaling.x = nodeAnim->mScalingKeys[k].mValue.x;
+				keyframe.m_Scaling.y = nodeAnim->mScalingKeys[k].mValue.y;
+				keyframe.m_Scaling.z = nodeAnim->mScalingKeys[k].mValue.z;
+
+				boneAnims.m_Scaling.push_back(keyframe);
+			}
+			
+			int boneIndex = file->m_BoneMapping[nodeAnim->mNodeName.C_Str()];
+			animation.m_BoneAnimations[boneIndex] = boneAnims;
+		}
+
+		file->m_Animations[anim->mName.C_Str()] = animation;
+	}
+}
 
 void ResourceLoader::LoadALUT(AudioResourceFile* audioRes, const char* audioBuffer, int format, int size, float frequency)
 {
