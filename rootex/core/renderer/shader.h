@@ -91,3 +91,19 @@ public:
 
 	void setSkyTexture(const Texture3D* texture);
 };
+
+class AnimationShader : public Shader
+{
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_SamplerState;
+
+public:
+	AnimationShader(const LPCWSTR& vertexPath, const LPCWSTR& pixelPath, const BufferFormat& vertexBufferFormat);
+	AnimationShader(AnimationShader&) = delete;
+	~AnimationShader() = default;
+	
+	friend class ShaderLibrary;
+	
+	virtual void bind() const override;
+
+	void setTexture(const Texture* texture);
+};

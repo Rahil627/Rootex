@@ -9,7 +9,8 @@ class ShaderLibrary
 	enum class ShaderType
 	{
 		Basic,
-		Sky
+		Sky,
+		Animation
 	};
 
 private:
@@ -27,4 +28,5 @@ public:
 
 	static BasicShader* GetBasicShader();
 	static SkyShader* GetSkyShader();
+	static AnimationShader* GetAnimationShader();
 };
