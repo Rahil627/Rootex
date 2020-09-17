@@ -116,6 +116,21 @@ struct VSDiffuseConstantBuffer
 	}
 };
 
+/// Vertex Shader constant buffer for animated models
+struct VSAnimationConstantBuffer
+{
+	Matrix m_BoneTransforms[256];
+	explicit VSAnimationConstantBuffer() = delete;
+	VSAnimationConstantBuffer(const Vector<Matrix>& transforms)
+	{
+		for (int i = 0; i < transforms.size(); i++)
+		{
+			m_BoneTransforms[i] = transforms[i];
+			// to be seen if transpose is to be taken or not
+		}
+	}
+};
+
 struct PerFrameVSCB
 {
 	Matrix view;

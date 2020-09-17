@@ -19,6 +19,7 @@
 #include "components/transform_component.h"
 #include "components/trigger_component.h"
 #include "components/visual/fog_component.h"
+#include "components/visual/animated_model_component.h"
 #include "components/visual/camera_component.h"
 #include "components/visual/sky_component.h"
 #include "components/visual/cpu_particles_component.h"
@@ -90,6 +91,7 @@ EntityFactory::EntityFactory()
 	REGISTER_COMPONENT(CPUParticlesComponent);
 	REGISTER_COMPONENT(TriggerComponent);
 	REGISTER_COMPONENT(UIComponent);
+	//REGISTER_COMPONENT(AnimatedModelComponent);
 }
 
 Ref<Component> EntityFactory::createComponent(const String& name, const JSON::json& componentData)
