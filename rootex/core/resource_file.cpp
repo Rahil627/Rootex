@@ -182,7 +182,22 @@ void AnimatedModelResourceFile::RegisterAPI(sol::state& rootex)
 	    sol::base_classes, sol::bases<ResourceFile>());
 }
 
-void AnimatedModelResourceFile::GetBoneTransforms(aiNode* currentNode, Matrix parentRootTransform)
+Vector<String> AnimatedModelResourceFile::getAnimationNames()
+{
+	Vector<String> animationNames;
+	for (auto& element : m_Animations)
+	{
+		animationNames.push_back(element.first);
+	}
+	return animationNames;
+}
+
+float AnimatedModelResourceFile::getAnimationEndTime(const String& animationName)
+{
+	return m_Animations[animationName].getEndTime();
+}
+
+void AnimatedModelResourceFile::setBoneTransforms(aiNode* currentNode, Matrix parentRootTransform)
 {
 	aiMatrix4x4 transform = currentNode->mTransformation;
 	Matrix toRootTransformation = Matrix({ transform.a1, transform.a2, transform.a3, transform.a4,
@@ -193,8 +208,19 @@ void AnimatedModelResourceFile::GetBoneTransforms(aiNode* currentNode, Matrix pa
 	UINT index = m_BoneMapping[currentNode->mName.C_Str()];
 	m_BoneTransforms[index] = currentRootTransform;
 
-	for (size_t i = 0; i < currentNode->mNumChildren; i++) {
-		GetBoneTransforms(currentNode->mChildren[i], currentRootTransform);
+	for (size_t i = 0; i < currentNode->mNumChildren; i++) 
+	{
+		setBoneTransforms(currentNode->mChildren[i], currentRootTransform);
+	}
+}
+
+void AnimatedModelResourceFile::getFinalTransforms(const String& animationName, float currentTime, Vector<Matrix>& transforms)
+{
+	m_Animations[animationName].interpolate(currentTime, transforms);
+
+	for (UINT i = 0; i < getBoneCount(); i++)
+	{
+		transforms[i] *= m_BoneOffsets[i] * m_BoneTransforms[i]; // see this method of calculating
 	}
 }
 

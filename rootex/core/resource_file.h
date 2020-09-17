@@ -173,7 +173,13 @@ public:
 	explicit AnimatedModelResourceFile(AnimatedModelResourceFile&&) = delete;
 
 	HashMap<Ref<Material>, Vector<AnimatedMesh>>& getMeshes() { return m_Meshes; }
-	void GetBoneTransforms(aiNode* currentNode, Matrix rootTransform);
+	HashMap<String, SkeletalAnimation>& getAnimations() { return m_Animations; }
+	UINT getBoneCount() const { return m_BoneOffsets.size(); }
+
+	Vector<String> getAnimationNames();
+	float getAnimationEndTime(const String& animationName);
+	void setBoneTransforms(aiNode* currentNode, Matrix rootTransform);
+	void getFinalTransforms(const String& animationName, float currentTime, Vector<Matrix>& transforms);
 };
 
 /// Representation of an image file. Supports BMP, JPEG, PNG, TIFF, GIF, HD Photo, or other WIC supported file containers
